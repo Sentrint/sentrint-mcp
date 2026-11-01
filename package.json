@@ -1,16 +1,36 @@
 {
   "name": "@sentrint/mcp",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Local bridge to the Sentrint MCP server",
   "mcpName": "com.sentrint/sentrint",
   "type": "module",
-  "bin": { "sentrint-mcp": "bin/sentrint-mcp.js" },
-  "files": ["bin/", "src/"],
-  "engines": { "node": ">=20" },
+  "bin": {
+    "sentrint-mcp": "bin/sentrint-mcp.js"
+  },
+  "files": [
+    "bin/",
+    "src/"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/Sentrint/sentrint-mcp.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sentrint/sentrint-mcp.git"
+  },
   "homepage": "https://sentrint.com/wiki/mcp",
   "bugs": "https://github.com/Sentrint/sentrint-mcp/issues",
-  "keywords": ["mcp", "security", "code-scanning"],
-  "publishConfig": { "access": "public", "provenance": true }
+  "keywords": [
+    "mcp",
+    "security",
+    "code-scanning"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }
