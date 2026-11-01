@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, stat, utimes, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -67,6 +67,16 @@ test("a lock left by a dead process is taken over", async () => {
   const store = new Store(await tempDir(), DEFAULT_SERVER);
   await store.ensureDir();
   await writeFile(store.lockFile, "999999999:dead");
+  assert.equal(await store.withLock(async () => "ran", { wait: 1000 }), "ran");
+});
+
+test("a lock older than any real hold is taken over even if its PID is alive", async () => {
+  // The holder died and an unrelated process got its PID.
+  const store = new Store(await tempDir(), DEFAULT_SERVER);
+  await store.ensureDir();
+  await writeFile(store.lockFile, `${process.pid}:reused-pid`);
+  const old = new Date(Date.now() - 8 * 60_000);
+  await utimes(store.lockFile, old, old);
   assert.equal(await store.withLock(async () => "ran", { wait: 1000 }), "ran");
 });
 

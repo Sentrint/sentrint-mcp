@@ -3,6 +3,7 @@ import { mkdir, open, readFile, rename, rm, stat, writeFile } from "node:fs/prom
 import { join } from "node:path";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const MAX_HOLD_MS = 7 * 60_000;
 
 export class LockTimeout extends Error {
   constructor() {
@@ -88,10 +89,15 @@ export class Store {
   async #lockIsStale() {
     const holder = await readFile(this.lockFile, "utf8").catch(() => null);
     if (holder === null) return false; // gone already: the next open() will tell
+    const info = await stat(this.lockFile).catch(() => null);
+    if (info === null) return false;
+    const age = Date.now() - info.mtimeMs;
+    // Backstop for a holder that died and whose PID was reused: nothing legitimately holds
+    // the lock longer than a 5-minute browser sign-in plus the code exchange.
+    if (age > MAX_HOLD_MS) return true;
     const pid = Number(holder.split(":")[0]);
     if (Number.isInteger(pid) && pid > 0) return !isAlive(pid);
     // Unreadable content: either half-written right now, or junk. Give a writer 5 seconds.
-    const info = await stat(this.lockFile).catch(() => null);
-    return info !== null && Date.now() - info.mtimeMs > 5_000;
+    return age > 5_000;
   }
 }

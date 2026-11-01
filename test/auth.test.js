@@ -83,6 +83,7 @@ test("with nothing saved, the agent path starts sign-in without waiting for it",
   const err = await m.getToken().catch((e) => e);
   assert.ok(err instanceof SignInRequired);
   assert.match(err.message, /browser/);
+  assert.match(err.message, /npx -y @sentrint\/mcp login/, "a way out when no browser opens");
   assert.equal(started, 1);
 });
 
@@ -96,6 +97,7 @@ test("the agent path does not hang behind a sign-in held by another process", as
   const err = await m.getToken().catch((e) => e);
   assert.ok(err instanceof SignInRequired);
   assert.match(err.message, /in progress/);
+  assert.match(err.message, /npx -y @sentrint\/mcp login/);
 });
 
 test("a full interactive sign-in: register, browser, callback, exchange, save", async () => {

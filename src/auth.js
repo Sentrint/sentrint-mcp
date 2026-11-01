@@ -6,6 +6,9 @@ import { LockTimeout } from "./store.js";
 
 const EARLY_MS = 60_000; // refresh a minute before the server says the token expires
 
+// The detached sign-in has no terminal: with no browser (SSH, WSL, headless), this is the way out.
+const FALLBACK = "If no browser opened, run `npx -y @sentrint/mcp login` in a terminal.";
+
 export class SignInRequired extends Error {}
 
 const usable = (tokens, now) =>
@@ -67,7 +70,7 @@ export class TokenManager {
       return await this.store.withLock(() => this.#renewLocked(stale), { wait: this.lockWait });
     } catch (err) {
       if (err instanceof LockTimeout && !this.interactive) {
-        throw new SignInRequired("A Sentrint sign-in is in progress in your browser. Finish it, then try again.");
+        throw new SignInRequired(`A Sentrint sign-in is in progress in your browser. Finish it, then try again. ${FALLBACK}`);
       }
       throw err;
     }
@@ -94,7 +97,7 @@ export class TokenManager {
         this.signInStarted = true;
         this.startSignIn();
       }
-      throw new SignInRequired("Sign in to Sentrint in the browser window that just opened, then reconnect Sentrint in your agent.");
+      throw new SignInRequired(`Sign in to Sentrint in the browser window that just opened, then reconnect Sentrint in your agent. ${FALLBACK}`);
     }
     return this.#login(data);
   }
